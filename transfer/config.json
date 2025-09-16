@@ -1,0 +1,200 @@
+{
+  "random_state": 42,
+  "device": "auto",
+  "data_paths": {
+    "vam_data": "data/VAM_LWRHEAS_property_AlNbTiVZrCrMoHfTaW_20241202-clean-RT.csv",
+    "am_data": "data/AM_LWRHEAS_property_20231213-RT_train.csv",
+    "am_valid": "data/AM_LWRHEAS_property_20231213-RT_valid.csv",
+    "am_original": "data/AM_LWRHEAS_property_20231123-RT.csv"
+  },
+  "feature_columns": {
+    "composition": ["x(Al)", "x(Nb)", "x(Ti)", "x(V)", "x(Zr)", "x(Cr)", "x(Mo)", "x(Hf)", "x(Ta)"],
+    "vam_process": ["anneal_temperature", "anneal_time", "C(0)/T(1)"],
+    "am_process": ["LED", "AED", "VED", "C(0)/T(1)"],
+    "am_process_extended": ["Power/W", "Speed/mm/s", "LED", "AED", "VED", "C(0)/T(1)"],
+    "parameters": ["Tm", "Delta-r", "Delta-X_Allen", "G", "Delta-G", "K", "DK", "W"],
+    "parameters_extended": ["Delta-Smix", "Delta-Hmix", "Tm", "Delta-r", "Gama", "alpha2", "VEC", "e/a", "Delta-X_Pauling", "Delta-X_Allen", "G", "Delta-G", "DG", "K", "Delta-K", "DK", "W", "mu", "deltaH_el"],
+    "properties": ["YS"],
+    "properties_extended": ["Density", "YS", "SYS"]
+  },
+  "model_config": {
+    "vam_net": {
+      "input_size": 11,
+      "hidden_sizes": [128, 64],
+      "dropout": 0.0
+    },
+    "am_feature_net": {
+      "input_size": 11,
+      "hidden_sizes": [256, 64, 32],
+      "output_size": 10,
+      "dropout": 0.1
+    },
+    "am_feature_net_extended": {
+      "input_size": 13,
+      "hidden_sizes": [256, 64, 32],
+      "output_size": 10,
+      "dropout": 0.1
+    },
+    "training": {
+      "epochs": 2000,
+      "learning_rate": 0.001,
+      "weight_decay": 0.001,
+      "patience": 100,
+      "batch_size": 32,
+      "validation_split": 0.2
+    },
+    "early_stopping": {
+      "monitor": "val_loss",
+      "patience": 50,
+      "min_delta": 0.001,
+      "restore_best_weights": true
+    }
+  },
+  "data_processing": {
+    "test_size": 0.2,
+    "validation_size": 0.15,
+    "scaler_type": "standard",
+    "feature_selection": {
+      "variance_threshold": 0.01,
+      "correlation_threshold": 0.95,
+      "random_forest_n_features": null
+    },
+    "data_cleaning": {
+      "remove_outliers": true,
+      "outlier_method": "iqr",
+      "outlier_factor": 1.5,
+      "handle_missing": "drop"
+    }
+  },
+  "optimization": {
+    "population_size": 100,
+    "generations": 50,
+    "crossover_prob": 0.8,
+    "mutation_prob": 0.1,
+    "elite_size": 10,
+    "tournament_size": 3
+  },
+  "composition_constraints": {
+    "x(Al)": [0, 20],
+    "x(Nb)": [0, 35],
+    "x(Ti)": [0, 40],
+    "x(V)": [0, 40],
+    "x(Zr)": [0, 35],
+    "x(Cr)": [0, 20],
+    "x(Mo)": [0, 20],
+    "x(Hf)": [0, 15],
+    "x(Ta)": [0, 15]
+  },
+  "process_parameters": {
+    "vam_default": {
+      "anneal_temperature": 0,
+      "anneal_time": 0,
+      "C(0)/T(1)": 0
+    },
+    "am_default": {
+      "LED": 1.12,
+      "AED": 18.67,
+      "VED": 466.7,
+      "C(0)/T(1)": 0
+    },
+    "am_extended": {
+      "Power/W": 320,
+      "Speed/mm/s": 500,
+      "LED": 1.12,
+      "AED": 18.67,
+      "VED": 466.7,
+      "C(0)/T(1)": 0
+    }
+  },
+  "output_dirs": {
+    "models": "models",
+    "results": "results",
+    "plots": "plots",
+    "reports": "reports",
+    "logs": "logs",
+    "checkpoints": "checkpoints"
+  },
+  "visualization": {
+    "figure_size": [10, 8],
+    "dpi": 300,
+    "style": "seaborn-v0_8",
+    "color_palette": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"],
+    "save_format": "png",
+    "show_plots": false
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file_logging": true,
+    "console_logging": true
+  },
+  "experiment": {
+    "name": "alloy_ml_experiment",
+    "version": "1.0.0",
+    "description": "合金材料机器学习流水线实验",
+    "tags": ["alloy", "machine_learning", "transfer_learning", "optimization"],
+    "save_artifacts": true,
+    "track_metrics": true
+  },
+  "cross_validation": {
+    "cv_folds": 5,
+    "stratify": false,
+    "shuffle": true,
+    "random_state": 42
+  },
+  "model_evaluation": {
+    "metrics": ["r2", "mae", "mse", "rmse", "evs", "max_error", "mape"],
+    "confidence_interval": 0.95,
+    "bootstrap_samples": 1000
+  },
+  "feature_engineering": {
+    "polynomial_features": false,
+    "interaction_features": false,
+    "scaling_methods": ["standard", "minmax", "robust"],
+    "feature_selection_methods": ["variance", "correlation", "random_forest", "mutual_info"]
+  },
+  "hyperparameter_tuning": {
+    "enabled": false,
+    "method": "grid_search",
+    "param_grid": {
+      "learning_rate": [0.001, 0.01, 0.1],
+      "hidden_sizes": [[64, 32], [128, 64], [256, 128, 64]],
+      "dropout": [0.0, 0.1, 0.2]
+    },
+    "cv_folds": 3,
+    "n_iter": 50
+  },
+  "alloy_design": {
+    "num_samples": 1000,
+    "optimization_objectives": ["maximize_strength", "minimize_density"],
+    "constraint_handling": "penalty",
+    "multi_objective": true,
+    "pareto_front_size": 50
+  },
+  "model_interpretation": {
+    "shap_enabled": true,
+    "shap_samples": 100,
+    "feature_importance_methods": ["permutation", "shap", "gradient"],
+    "partial_dependence": true,
+    "ice_plots": false
+  },
+  "data_augmentation": {
+    "enabled": false,
+    "noise_factor": 0.05,
+    "augmentation_factor": 2.0,
+    "methods": ["gaussian_noise", "composition_perturbation"]
+  },
+  "model_ensemble": {
+    "enabled": false,
+    "models": ["vam_net", "random_forest", "xgboost"],
+    "voting_method": "average",
+    "weights": [0.5, 0.3, 0.2]
+  },
+  "deployment": {
+    "model_format": "pytorch",
+    "api_enabled": false,
+    "api_port": 8000,
+    "batch_prediction": true,
+    "model_versioning": true
+  }
+}
